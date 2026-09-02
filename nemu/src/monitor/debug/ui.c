@@ -133,6 +133,67 @@ static int cmd_p(char *args)
 	return 0;
 }
 
+static int cmd_w(char *args)
+{
+	bool success;
+	uint32_t value;
+	WP *wp;
+	if (args == NULL)
+	{
+		printf("Please specify an expression to watch.\n");
+		return 0;
+	}
+	// 计算表达式的值
+	value = expr(args, &success);
+	if (!success)
+	{
+		printf("Invalid expression: %s\n", args);
+		return 0;
+	}
+	// 建新的监视点
+	wp = new_wp();
+	if (wp == NULL)
+	{
+		printf("Failed to create a new watchpoint.\n");
+		return 0;
+	}
+	// 保存表达式和值
+	strncpy(wp->expr, args, sizeof(wp->expr) - 1);
+	wp->expr[sizeof(wp->expr) - 1] = '\0'; // 确保字符串以空字符结尾
+
+	wp->value = value;
+	printf("Watchpoint %d: %s\n", wp->NO, wp->expr);
+
+	return 0;
+}
+
+static int cmd_d(char *args)
+{
+	int NO;
+	WP *wp;
+	if (args == NULL)
+	{
+		printf("Please specify the watchpoint number to delete.\n");
+		return 0;
+	}
+	if (sscanf(args, "%d", &NO) != 1)
+	{
+		printf("Invalid watchpoint number: %s\n", args);
+		return 0;
+	}
+
+	wp = find_wp(NO);
+	if (wp == NULL)
+	{
+		printf("Watchpoint %d not found.\n", NO);
+		return 0;
+	}
+
+	free_wp(wp);
+	printf("Watchpoint %d deleted.\n", NO);
+	return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct
@@ -150,6 +211,8 @@ static struct
 	{"info", "Print register information", cmd_info},
 	{"x", "Examine memory", cmd_x},
 	{"p", "Evaluate expression", cmd_p},
+	{"w", "Set watchpoint", cmd_w},
+	{"d", "Delete watchpoint", cmd_d},
 
 };
 
