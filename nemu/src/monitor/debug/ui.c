@@ -110,6 +110,29 @@ static int cmd_x(char *args)
 	return 0;
 }
 
+static int cmd_p(char *args)
+{
+	if (args == NULL)
+	{
+		printf("Please specify an expression to evaluate.\n");
+		return 0;
+	}
+
+	bool success;
+	uint32_t result = expr(args, &success);
+
+	if (success)
+	{
+		printf("%d\n", (int32_t)result);
+	}
+	else
+	{
+		printf("Invalid expression: %s\n", args);
+	}
+
+	return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct
@@ -126,6 +149,7 @@ static struct
 	{"si", "Step instruction", cmd_si},
 	{"info", "Print register information", cmd_info},
 	{"x", "Examine memory", cmd_x},
+	{"p", "Evaluate expression", cmd_p},
 
 };
 
